@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidates Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .candidate-card:hover {
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-2xl font-bold text-gray-900">Candidates</h1>
+                    <button onclick="openAddModal()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center gap-2">
+                        <i class="bi bi-plus-lg"></i>
+                        Add Candidate
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Search and Filter -->
+            <div class="mb-6 flex flex-col sm:flex-row gap-4">
+                <div class="flex-1">
+                    <div class="relative">
+                        <input type="text" id="searchInput" placeholder="Search candidates..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+                <select class="border border-gray-300 rounded-md px-4 py-2 bg-white">
+                    <option value="">All Status</option>
+                    <option value="new">New</option>
+                    <option value="interviewing">Interviewing</option>
+                    <option value="offered">Offered</option>
+                    <option value="hired">Hired</option>
+                </select>
+            </div>
+
+            <!-- Candidates Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="candidatesGrid">
+                <!-- Candidates will be dynamically inserted here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Candidate Modal -->
+    <div id="addModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Add New Candidate</h2>
+                <button onclick="closeAddModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <form id="addCandidateForm" onsubmit="handleAddCandidate(event)">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Full Name</label>
+                        <input type="text" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Position</label>
+                        <input type="text" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Status</label>
+                        <select required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                            <option value="new">New</option>
+                            <option value="interviewing">Interviewing</option>
+                            <option value="offered">Offered</option>
+                            <option value="hired">Hired</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button" onclick="closeAddModal()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Candidate</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Sample candidate data
+        let candidates = [
+            {
+                id: 1,
+                name: "Alex Johnson",
+                email: "alex.j@example.com",
+                position: "Frontend Developer",
+                status: "interviewing",
+                avatar: "https://source.unsplash.com/100x100/?portrait,1"
+            },
+            {
+                id: 2,
+                name: "Sam Smith",
+                email: "sam.smith@example.com",
+                position: "UX Designer",
+                status: "new",
+                avatar: "https://source.unsplash.com/100x100/?portrait,2"
+            },
+            {
+                id: 3,
+                name: "Jordan Lee",
+                email: "jordan.l@example.com",
+                position: "Product Manager",
+                status: "offered",
+                avatar: "https://source.unsplash.com/100x100/?portrait,3"
+            }
+        ];
+
+        // Render candidates
+        function renderCandidates() {
+            const grid = document.getElementById('candidatesGrid');
+            grid.innerHTML = candidates.map(candidate => `
+                <div class="candidate-card bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md">
+                    <div class="flex items-center gap-4 mb-4">
+                        <img src="${candidate.avatar}" alt="${candidate.name}" class="w-12 h-12 rounded-full object-cover">
+                        <div>
+                            <h3 class="font-semibold text-gray-900">${candidate.name}</h3>
+                            <p class="text-sm text-gray-500">${candidate.email}</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <p class="text-gray-700"><i class="bi bi-briefcase mr-2"></i>${candidate.position}</p>
+                        <div class="flex items-center">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusStyle(candidate.status)}">
+                                ${candidate.status.charAt(0).toUpperCase() + candidate.status.slice(1)}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Status style helper
+        function getStatusStyle(status) {
+            const styles = {
+                new: 'bg-gray-100 text-gray-800',
+                interviewing: 'bg-blue-100 text-blue-800',
+                offered: 'bg-yellow-100 text-yellow-800',
+                hired: 'bg-green-100 text-green-800'
+            };
+            return styles[status] || styles.new;
+        }
+
+        // Modal functions
+        function openAddModal() {
+            document.getElementById('addModal').classList.remove('hidden');
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').classList.add('hidden');
+        }
+
+        // Handle adding new candidate
+        function handleAddCandidate(event) {
+            event.preventDefault();
+            const form = event.target;
+            const newCandidate = {
+                id: candidates.length + 1,
+                name: form.elements[0].value,
+                email: form.elements[1].value,
+                position: form.elements[2].value,
+                status: form.elements[3].value,
+                avatar: `https://source.unsplash.com/100x100/?portrait,${candidates.length + 1}`
+            };
+            candidates.unshift(newCandidate);
+            renderCandidates();
+            closeAddModal();
+            form.reset();
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            candidates = candidates.filter(candidate => 
+                candidate.name.toLowerCase().includes(searchTerm) ||
+                candidate.email.toLowerCase().includes(searchTerm) ||
+                candidate.position.toLowerCase().includes(searchTerm)
+            );
+            renderCandidates();
+        });
+
+        // Initial render
+        renderCandidates();
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
